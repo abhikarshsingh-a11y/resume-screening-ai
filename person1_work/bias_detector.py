@@ -20,33 +20,35 @@ def remove_bias_elements(text):
     
     cleaned = text
     
-    # Remove email addresses
-    cleaned = re.sub(r'\S+@\S+', '[EMAIL REMOVED]', cleaned)
+    # Remove email addresses only
+    cleaned = re.sub(
+        r'\S+@\S+', 
+        '[EMAIL REMOVED]', 
+        cleaned
+    )
     
-    # Remove phone numbers
-    cleaned = re.sub(r'[\+\(]?[1-9][0-9\s\-\(\)]{8,20}[0-9]', '[PHONE REMOVED]', cleaned)
+    # Remove phone numbers only
+    cleaned = re.sub(
+        r'[\+\(]?[1-9][0-9\s\-\(\)]{8,20}[0-9]', 
+        '[PHONE REMOVED]', 
+        cleaned
+    )
     
-    # Remove URLs and LinkedIn
-    cleaned = re.sub(r'http\S+|www\S+|linkedin\S+', '[LINK REMOVED]', cleaned)
+    # Remove LinkedIn URL only
+    cleaned = re.sub(
+        r'linkedin\S+', 
+        '[LINK REMOVED]', 
+        cleaned, 
+        flags=re.IGNORECASE
+    )
     
-    # Remove university names
-    universities = [
-        "galgotias university", "amity university",
-        "bennett university", "sharda university",
-        "iit delhi", "iit bombay", "nit trichy",
-        "bits pilani", "vit vellore", "srm university"
-    ]
-    for uni in universities:
-        cleaned = re.sub(uni, '[COLLEGE REMOVED]', 
-                        cleaned, flags=re.IGNORECASE)
-    
-    # Remove first line (candidate name)
+    # Remove first line only (candidate name)
     lines = cleaned.split('\n')
     if len(lines) > 0:
         lines[0] = '[NAME REMOVED]'
     cleaned = '\n'.join(lines)
     
-    return cleaned   
+    return cleaned
 
  
 def detect_bias(resume_path, job_description):
