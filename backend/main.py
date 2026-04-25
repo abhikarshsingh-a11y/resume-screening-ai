@@ -4,6 +4,22 @@ import shutil
 import warnings
 import logging
 
+
+
+# Import database functions
+sys.path.append(r"C:\Users\singh\resume-screening-ai\person2_work")
+from database import create_tables, save_candidate, save_score, get_all_candidates, get_top_candidates
+
+# Create tables when API starts
+create_tables()
+
+
+
+
+
+
+
+
 # Suppress logs
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 warnings.filterwarnings('ignore')
@@ -61,9 +77,10 @@ def home():
 @app.post("/analyze")
 async def analyze_resume(
     resume: UploadFile = File(...),
-    job_description: str = Form(...)
+    job_description: str = Form(...),
+    candidate_name: str = Form(...),
+    candidate_email: str = Form(...)
 ):
-    # Save file temporarily
     temp_path = f"temp_{resume.filename}"
 
     with open(temp_path, "wb") as buffer:
@@ -104,8 +121,22 @@ async def analyze_resume(
         else:
             recommendation = "WEAK MATCH"
 
+        # Save to database
+        candidate_id = save_candidate(
+            candidate_name,
+            candidate_email,
+            cleaned_text
+        )
+        save_score(
+            candidate_id,
+            job_description[:50],
+            match_score,
+            missing
+        )
+
         return {
             "status": "success",
+            "candidate_id": candidate_id,
             "match_score": match_score,
             "resume_skills": resume_skills,
             "matched_skills": matched,
@@ -126,3 +157,24 @@ async def analyze_resume(
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+
+# Endpoint — Get all candidates (for recruiter)
+@app.get("/candidates")
+def get_candidates():
+    candidates = get_all_candidates()
+    return {
+        "status": "success",
+        "total": len(candidates),
+        "candidates": candidates
+    }
+
+# Endpoint — Get top candidates for a job
+@app.get("/top-candidates")
+def top_candidates(job_title: str):
+    results = get_top_candidates(job_title)
+    return {
+        "status": "success",
+        "job_title": job_title,
+        "top_candidates": results
+    }
