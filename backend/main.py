@@ -109,10 +109,11 @@ async def analyze_resume(
 
         # Detect bias
         original, debiased, bias_impact = detect_bias(
-            temp_path,
-            job_description
+             temp_path,
+             job_description
         )
 
+        
         # Recommendation
         if match_score >= 70:
             recommendation = "STRONG MATCH"
