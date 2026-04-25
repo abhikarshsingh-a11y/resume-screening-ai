@@ -47,15 +47,35 @@ def suggest_resources(missing_skills):
     
     return suggestions
 
+def rank_suggestions(suggestions, job_skills):
+    
+    high_priority = [
+        "python", "sql", "machine learning",
+        "docker", "aws", "fastapi", "postgresql"
+    ]
+    
+    ranked = []
+    
+    for s in suggestions:
+        if s["skill"] in high_priority:
+            s["priority"] = "🔴 High"
+        else:
+            s["priority"] = "🟡 Medium"
+        ranked.append(s)
+    
+    return ranked
+
 
 if __name__ == "__main__":
     resume = ["python", "sql", "git"]
-    job    = ["python", "sql", "docker", "fastapi", "aws"]
+    job    = ["python", "sql", "docker", "fastapi", "aws", "css"]
     
     missing     = get_missing_skills(resume, job)
     suggestions = suggest_resources(missing)
+    ranked      = rank_suggestions(suggestions, job)
     
-    print("Missing skills:", missing)
-    print("\nSuggestions:")
-    for s in suggestions:
-        print(f"  Learn {s['skill']} → {s['resource']}")
+    print("=== Resume Improvement Suggestions ===\n")
+    for s in ranked:
+        print(f"{s['priority']} — Learn {s['skill']}")
+        print(f"   Resource: {s['resource']}\n")
+        
