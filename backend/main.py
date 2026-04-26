@@ -4,16 +4,46 @@ import shutil
 import warnings
 import logging
 
+# Suppress logs FIRST - before everything else
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+warnings.filterwarnings('ignore')
+logging.getLogger("transformers").setLevel(logging.ERROR)
+logging.getLogger("sentence_transformers").setLevel(logging.ERROR)
 
+# FastAPI imports
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
 
-# Import database functions
+# Add paths - works on both Windows and Linux
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 sys.path.append(os.path.join(BASE_DIR, "person1_work"))
 sys.path.append(os.path.join(BASE_DIR, "person2_work"))
 sys.path.append(os.path.join(BASE_DIR, "combined"))
 sys.path.append(os.path.join(BASE_DIR, "backend"))
+
+# Import your functions
+from read_resume import read_resume
+from clean_text import clean_text
+from extract_skills import extract_skills
+from smart_match import get_semantic_score, find_skill_details
+from bias_detector import detect_bias
 from database import create_tables, save_candidate, save_score, get_all_candidates, get_top_candidates
+
+# Create app first
+app = FastAPI(
+    title="Resume Screening AI",
+    description="AI powered resume screening platform",
+    version="1.0.0"
+)
+
+# Allow frontend connection
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 
 # Create tables when API starts
 create_tables()
