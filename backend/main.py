@@ -7,7 +7,12 @@ import logging
 
 
 # Import database functions
-sys.path.append(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\person2_work")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+sys.path.append(os.path.join(BASE_DIR, "person1_work"))
+sys.path.append(os.path.join(BASE_DIR, "person2_work"))
+sys.path.append(os.path.join(BASE_DIR, "combined"))
+sys.path.append(os.path.join(BASE_DIR, "backend"))
 from database import create_tables, save_candidate, save_score, get_all_candidates, get_top_candidates
 
 # Create tables when API starts
