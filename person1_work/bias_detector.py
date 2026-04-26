@@ -9,8 +9,12 @@ import logging
 logging.getLogger("transformers").setLevel(logging.ERROR)
 logging.getLogger("sentence_transformers").setLevel(logging.ERROR)
 
-sys.path.append(r"C:\Users\singh\resume-screening-ai\person1_work")
-sys.path.append(r"C:\Users\singh\resume-screening-ai\combined")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+sys.path.append(os.path.join(BASE_DIR, "person1_work"))
+sys.path.append(os.path.join(BASE_DIR, "person2_work"))
+sys.path.append(os.path.join(BASE_DIR, "combined"))
+sys.path.append(os.path.join(BASE_DIR, "backend"))
 
 from read_resume import read_resume
 from clean_text import clean_text
