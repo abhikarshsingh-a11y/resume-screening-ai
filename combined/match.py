@@ -1,14 +1,16 @@
-# Import files from both teammates
+import os
 import sys
-sys.path.append(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\person1_work")
-sys.path.append(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\person2_work")
+
+# Works on both Windows and Linux
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(BASE_DIR, "person1_work"))
+sys.path.append(os.path.join(BASE_DIR, "person2_work"))
 
 from read_resume import read_resume
 from clean_text import clean_text
 from extract_skills import extract_skills as get_resume_skills
 
-# For now we manually write job skills
-# Later this will come from partner's file
+
 def get_job_skills():
     job_text = """
     Looking for developer with Python, SQL, 
@@ -32,22 +34,18 @@ def get_job_skills():
             found.append(skill)
     return found
 
-# Match resume skills vs job skills
+
 def match_skills(resume_skills, job_skills):
-    
-    # Find matching skills
     matched = []
     for skill in resume_skills:
         if skill in job_skills:
             matched.append(skill)
     
-    # Find missing skills
     missing = []
     for skill in job_skills:
         if skill not in resume_skills:
             missing.append(skill)
     
-    # Calculate score
     if len(job_skills) == 0:
         score = 0
     else:
@@ -55,25 +53,22 @@ def match_skills(resume_skills, job_skills):
     
     return matched, missing, round(score, 2)
 
-# Run everything
-print("🔍 Analyzing resume...")
-print("=" * 40)
 
-# Step 1 - Get resume skills
-raw = read_resume(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\data\resume.pdf")
-cleaned = clean_text(raw)
-resume_skills = get_resume_skills(cleaned)
+# ALL test code inside here - never runs on server
+if __name__ == "__main__":
+    print("🔍 Analyzing resume...")
+    print("=" * 40)
 
-# Step 2 - Get job skills
-job_skills = get_job_skills()
+    raw = read_resume(r"C:\Users\singh\resume-screening-ai\data\resume.pdf")
+    cleaned = clean_text(raw)
+    resume_skills = get_resume_skills(cleaned)
 
-# Step 3 - Match them
-matched, missing, score = match_skills(resume_skills, job_skills)
+    job_skills = get_job_skills()
+    matched, missing, score = match_skills(resume_skills, job_skills)
 
-# Step 4 - Show results
-print(f"\n📄 Resume Skills Found: {resume_skills}")
-print(f"\n💼 Job Required Skills: {job_skills}")
-print(f"\n✅ Matched Skills: {matched}")
-print(f"\n❌ Missing Skills: {missing}")
-print(f"\n🎯 Match Score: {score}%")
-print("=" * 40)
+    print(f"\n📄 Resume Skills Found: {resume_skills}")
+    print(f"\n💼 Job Required Skills: {job_skills}")
+    print(f"\n✅ Matched Skills: {matched}")
+    print(f"\n❌ Missing Skills: {missing}")
+    print(f"\n🎯 Match Score: {score}%")
+    print("=" * 40)

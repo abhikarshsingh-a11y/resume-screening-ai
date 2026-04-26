@@ -11,23 +11,15 @@ def read_resume(file_path):
 
 
 if __name__ == "__main__":
-    result = read_resume(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\data\resume.pdf")
-    print(result)
+    from clean_text import clean_text
+    from extract_skills import extract_skills
 
+    result = read_resume(r"C:\Users\singh\resume-screening-ai\data\resume.pdf")
+    print("✅ Step 1 - Resume read")
 
+    cleaned = clean_text(result)
+    print("✅ Step 2 - Text cleaned")
 
-from clean_text import clean_text
-from extract_skills import extract_skills
-
-# Step 1 - Read
-result = read_resume(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\data\resume.pdf")
-print("✅ Step 1 - Resume read")
-
-# Step 2 - Clean
-cleaned = clean_text(result)
-print("✅ Step 2 - Text cleaned")
-
-# Step 3 - Extract skills
-skills = extract_skills(cleaned)
-print("✅ Step 3 - Skills found:")
-print(skills)
+    skills = extract_skills(cleaned)
+    print("✅ Step 3 - Skills found:")
+    print(skills)
