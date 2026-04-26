@@ -10,15 +10,17 @@ def read_resume(file_path):
     return text
 
 
-result = read_resume(r"C:\Users\singh\resume-screening-ai\data\resume.pdf")
-print(result)
+if __name__ == "__main__":
+    result = read_resume(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\data\resume.pdf")
+    print(result)
+
 
 
 from clean_text import clean_text
 from extract_skills import extract_skills
 
 # Step 1 - Read
-result = read_resume(r"C:\Users\singh\resume-screening-ai\data\resume.pdf")
+result = read_resume(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\data\resume.pdf")
 print("✅ Step 1 - Resume read")
 
 # Step 2 - Clean

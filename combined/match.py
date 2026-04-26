@@ -1,7 +1,7 @@
 # Import files from both teammates
 import sys
-sys.path.append(r"C:\Users\singh\resume-screening-ai\person1_work")
-sys.path.append(r"C:\Users\singh\resume-screening-ai\person2_work")
+sys.path.append(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\person1_work")
+sys.path.append(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\person2_work")
 
 from read_resume import read_resume
 from clean_text import clean_text
@@ -60,7 +60,7 @@ print("🔍 Analyzing resume...")
 print("=" * 40)
 
 # Step 1 - Get resume skills
-raw = read_resume(r"C:\Users\singh\resume-screening-ai\data\resume.pdf")
+raw = read_resume(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\data\resume.pdf")
 cleaned = clean_text(raw)
 resume_skills = get_resume_skills(cleaned)
 

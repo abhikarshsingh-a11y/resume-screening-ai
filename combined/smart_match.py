@@ -17,7 +17,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import sys
 
 # Add paths to find our files
-sys.path.append(r"C:\Users\singh\resume-screening-ai\person1_work")
+sys.path.append(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\person1_work")
 
 from read_resume import read_resume
 from clean_text import clean_text
@@ -84,7 +84,7 @@ print("\n🔍 Analyzing resume with AI...")
 print("=" * 50)
 
 # Step 1 - Read and clean resume
-raw_text = read_resume(r"C:\Users\singh\resume-screening-ai\data\resume.pdf")
+raw_text = read_resume(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\data\resume.pdf")
 cleaned_text = clean_text(raw_text)
 
 # Step 2 - Get overall semantic score

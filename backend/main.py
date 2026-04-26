@@ -7,7 +7,7 @@ import logging
 
 
 # Import database functions
-sys.path.append(r"C:\Users\singh\resume-screening-ai\person2_work")
+sys.path.append(r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\person2_work")
 from database import create_tables, save_candidate, save_score, get_all_candidates, get_top_candidates
 
 # Create tables when API starts
@@ -32,10 +32,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Add paths
 sys.path.append(
-    r"C:\Users\singh\resume-screening-ai\person1_work"
+    r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\person1_work"
 )
 sys.path.append(
-    r"C:\Users\singh\resume-screening-ai\combined"
+    r"C:\Users\taswi\OneDrive\Desktop\person2_work\resume-screening-ai\combined"
 )
 
 # Import your functions
@@ -51,6 +51,8 @@ app = FastAPI(
     description="AI powered resume screening platform",
     version="1.0.0"
 )
+
+
 
 # Allow frontend connection
 app.add_middleware(
@@ -178,4 +180,170 @@ def top_candidates(job_title: str):
         "status": "success",
         "job_title": job_title,
         "top_candidates": results
+    }
+
+# ─────────────────────────────────────
+# RECRUITER ROUTES — Built by Person 2
+# ─────────────────────────────────────
+
+# ROUTE 1 — Get all candidates
+@app.get("/recruiter/candidates")
+def recruiter_candidates():
+    candidates = get_all_candidates()
+    
+    if not candidates:
+        return {
+            "status": "success",
+            "total": 0,
+            "candidates": [],
+            "message": "No candidates yet"
+        }
+    
+    result = []
+    for c in candidates:
+        result.append({
+            "id"    : c[0],
+            "name"  : c[1],
+            "email" : c[2],
+            "date"  : c[4]
+        })
+    
+    return {
+        "status"     : "success",
+        "total"      : len(result),
+        "candidates" : result
+    }
+
+
+# ROUTE 2 — Get top ranked candidates
+@app.get("/recruiter/top")
+def top_candidates(job_title: str = "Developer"):
+    results = get_top_candidates(job_title, limit=10)
+    
+    if not results:
+        return {
+            "status"  : "success",
+            "message" : f"No candidates found for {job_title}",
+            "top_candidates": []
+        }
+    
+    ranked = []
+    for r in results:
+        ranked.append({
+            "name"          : r[0],
+            "email"         : r[1],
+            "match_score"   : f"{round(r[2], 1)}%",
+            "missing_skills": r[3]
+        })
+    
+    return {
+        "status"         : "success",
+        "job_title"      : job_title,
+        "total"          : len(ranked),
+        "top_candidates" : ranked
+    }
+
+
+# ROUTE 3 — Get single candidate details
+@app.get("/recruiter/candidate/{candidate_id}")
+def get_candidate(candidate_id: int):
+    scores = get_scores_for_candidate(candidate_id)
+    candidates = get_all_candidates()
+    
+    # Find this specific candidate
+    candidate_info = None
+    for c in candidates:
+        if c[0] == candidate_id:
+            candidate_info = c
+            break
+    
+    if not candidate_info:
+        return {
+            "status" : "error",
+            "message": f"Candidate {candidate_id} not found"
+        }
+    
+    # Build their score history
+    score_history = []
+    for s in scores:
+        score_history.append({
+            "job_title"     : s[2],
+            "match_score"   : f"{round(s[3], 1)}%",
+            "missing_skills": s[4],
+            "date"          : s[5]
+        })
+    
+    return {
+        "status"        : "success",
+        "candidate_id"  : candidate_id,
+        "name"          : candidate_info[1],
+        "email"         : candidate_info[2],
+        "score_history" : score_history
+    }
+
+
+# ROUTE 4 — Delete a candidate
+@app.delete("/recruiter/candidate/{candidate_id}")
+def delete_candidate(candidate_id: int):
+    import sqlite3
+    
+    try:
+        conn = sqlite3.connect("resume_screening.db")
+        cursor = conn.cursor()
+        
+        # Delete their scores first
+        cursor.execute(
+            "DELETE FROM scores WHERE candidate_id = ?",
+            (candidate_id,)
+        )
+        
+        # Then delete the candidate
+        cursor.execute(
+            "DELETE FROM candidates WHERE id = ?",
+            (candidate_id,)
+        )
+        
+        conn.commit()
+        conn.close()
+        
+        return {
+            "status" : "success",
+            "message": f"Candidate {candidate_id} deleted"
+        }
+    
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+
+# ROUTE 5 — Overall statistics
+@app.get("/recruiter/stats")
+def get_stats():
+    candidates = get_all_candidates()
+    
+    if not candidates:
+        return {
+            "status"           : "success",
+            "total_candidates" : 0,
+            "message"          : "No data yet"
+        }
+    
+    # Get all scores to calculate average
+    all_scores = []
+    for c in candidates:
+        scores = get_scores_for_candidate(c[0])
+        for s in scores:
+            all_scores.append(s[3])
+    
+    avg_score = 0
+    if all_scores:
+        avg_score = round(sum(all_scores) / len(all_scores), 1)
+    
+    return {
+        "status"            : "success",
+        "total_candidates"  : len(candidates),
+        "total_applications": len(all_scores),
+        "average_score"     : f"{avg_score}%"
     }
