@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Dashboard — Resume Screening AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f1a;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px 40px;
+            border-bottom: 2px solid #00d4ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #00d4ff;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
+        }
+
+        /* ── Stats Bar ── */
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            padding: 20px 40px;
+            background: #1a1a2e;
+        }
+
+        .stat-card {
+            background: #16213e;
+            border: 1px solid #00d4ff33;
+            border-radius: 12px;
+            padding: 20px 30px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* ── Main Content ── */
+        .container {
+            padding: 30px 40px;
+        }
+
+        /* ── Search Bar ── */
+        .search-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .search-section input {
+            flex: 1;
+            padding: 12px 20px;
+            background: #1a1a2e;
+            border: 1px solid #00d4ff44;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-section input:focus {
+            border-color: #00d4ff;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #00d4ff;
+            color: #0f0f1a;
+        }
+
+        .btn-primary:hover {
+            background: #00b8d9;
+        }
+
+        .btn-danger {
+            background: #ff4444;
+            color: white;
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+
+        .btn-danger:hover {
+            background: #cc0000;
+        }
+
+        /* ── Section Title ── */
+        .section-title {
+            font-size: 20px;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            border-left: 4px solid #00d4ff;
+            padding-left: 12px;
+        }
+
+        /* ── Candidates Table ── */
+        .table-wrapper {
+            background: #1a1a2e;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            border: 1px solid #00d4ff22;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #16213e;
+        }
+
+        thead th {
+            padding: 15px 20px;
+            text-align: left;
+            color: #00d4ff;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        tbody tr {
+            border-top: 1px solid #ffffff11;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #ffffff08;
+        }
+
+        tbody td {
+            padding: 15px 20px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        /* ── Score Badge ── */
+        .score-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .score-high   { background: #00ff8822; color: #00ff88; }
+        .score-medium { background: #ffaa0022; color: #ffaa00; }
+        .score-low    { background: #ff444422; color: #ff4444; }
+
+        /* ── Loading ── */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        /* ── Empty State ── */
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: #555;
+        }
+
+        .empty p {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000000aa;
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #1a1a2e;
+            border: 1px solid #00d4ff44;
+            border-radius: 16px;
+            padding: 30px;
+            width: 500px;
+            max-width: 90%;
+        }
+
+        .modal h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+
+        .modal-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ffffff11;
+            font-size: 14px;
+        }
+
+        .modal-row .key   { color: #888; }
+        .modal-row .value { color: #fff; font-weight: bold; }
+
+        .modal-close {
+            margin-top: 20px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <div>
+        <h1>🎯 Recruiter Dashboard</h1>
+        <p>Resume Screening AI Platform</p>
+    </div>
+    <div>
+        <span class="status-dot"></span>
+        <span style="color:#00ff88; font-size:14px;">API Connected</span>
+    </div>
+</div>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+    <div class="stat-card">
+        <div class="number" id="total-candidates">—</div>
+        <div class="label">Total Candidates</div>
+    </div>
+    <div class="stat-card">
+        <div class="number" id="total-applications">—</div>
+        <div class="label">Total Applications</div>
+    </div>
+    <div class="stat-card">
+        <div class="number" id="avg-score">—</div>
+        <div class="label">Average Match Score</div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container">
+
+    <!-- Search -->
+    <div class="search-section">
+        <input type="text" id="job-input"
+               placeholder="Enter job title to find top candidates (e.g. Python Developer)">
+        <button class="btn btn-primary" onclick="loadTop()">
+            🔍 Find Top Candidates
+        </button>
+        <button class="btn btn-primary" onclick="loadAll()"
+                style="background:#7c3aed;">
+            👥 All Candidates
+        </button>
+    </div>
+
+    <!-- Table -->
+    <div class="section-title" id="table-title">
+        All Candidates
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Match Score</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="candidates-body">
+                <tr>
+                    <td colspan="5" class="loading">
+                        Loading candidates...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+    <div class="modal">
+        <h2>👤 Candidate Details</h2>
+        <div id="modal-content"></div>
+        <button class="btn btn-primary modal-close"
+                onclick="closeModal()">
+            Close
+        </button>
+    </div>
+</div>
+
+<script>
+    const API = "http://127.0.0.1:8000";
+
+    // ── Load Stats ──────────────────────────
+    async function loadStats() {
+        try {
+            const res  = await fetch(`${API}/recruiter/stats`);
+            const data = await res.json();
+
+            document.getElementById("total-candidates").textContent
+                = data.total_candidates || 0;
+            document.getElementById("total-applications").textContent
+                = data.total_applications || 0;
+            document.getElementById("avg-score").textContent
+                = data.average_score || "0%";
+        } catch {
+            document.getElementById("total-candidates").textContent = "—";
+        }
+    }
+
+    // ── Load All Candidates ──────────────────
+    async function loadAll() {
+        document.getElementById("table-title").textContent
+            = "All Candidates";
+
+        const body = document.getElementById("candidates-body");
+        body.innerHTML = `<tr><td colspan="5" class="loading">
+                          Loading...</td></tr>`;
+
+        try {
+            const res  = await fetch(`${API}/recruiter/candidates`);
+            const data = await res.json();
+            renderTable(data.candidates || [], "all");
+        } catch {
+            body.innerHTML = `<tr><td colspan="5" class="empty">
+                <p>❌ Cannot connect to API</p>
+                <p style="font-size:13px; margin-top:8px;">
+                Make sure server is running</p>
+                </td></tr>`;
+        }
+    }
+
+    // ── Load Top Candidates ──────────────────
+    async function loadTop() {
+        const job = document.getElementById("job-input").value
+                    || "Developer";
+
+        document.getElementById("table-title").textContent
+            = `Top Candidates — ${job}`;
+
+        const body = document.getElementById("candidates-body");
+        body.innerHTML = `<tr><td colspan="5" class="loading">
+                          Searching...</td></tr>`;
+
+        try {
+            const res  = await fetch(
+                `${API}/recruiter/top?job_title=${job}`);
+            const data = await res.json();
+            renderTable(data.top_candidates || [], "top");
+        } catch {
+            body.innerHTML = `<tr><td colspan="5" class="empty">
+                              <p>❌ Error loading</p></td></tr>`;
+        }
+    }
+
+    // ── Render Table ─────────────────────────
+    function renderTable(candidates, type) {
+        const body = document.getElementById("candidates-body");
+
+        if (!candidates.length) {
+            body.innerHTML = `<tr><td colspan="5" class="empty">
+                <p>No candidates found</p></td></tr>`;
+            return;
+        }
+
+        body.innerHTML = candidates.map(c => {
+            const score     = c.match_score || "N/A";
+            const scoreNum  = parseFloat(score) || 0;
+            const badgeClass = scoreNum >= 70 ? "score-high"
+                             : scoreNum >= 50 ? "score-medium"
+                             : "score-low";
+
+            return `
+            <tr>
+                <td>${c.id || "—"}</td>
+                <td><strong>${c.name}</strong></td>
+                <td>${c.email}</td>
+                <td>
+                    <span class="score-badge ${badgeClass}">
+                        ${score}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-primary"
+                        style="padding:6px 14px; font-size:13px;"
+                        onclick="viewCandidate(${c.id})">
+                        View
+                    </button>
+                    &nbsp;
+                    <button class="btn btn-danger"
+                        onclick="deleteCandidate(${c.id})">
+                        Delete
+                    </button>
+                </td>
+            </tr>`;
+        }).join("");
+    }
+
+    // ── View Candidate ───────────────────────
+    async function viewCandidate(id) {
+        try {
+            const res  = await fetch(
+                `${API}/recruiter/candidate/${id}`);
+            const data = await res.json();
+
+            const history = (data.score_history || [])
+                .map(s => `
+                <div class="modal-row">
+                    <span class="key">${s.job_title}</span>
+                    <span class="value">${s.match_score}</span>
+                </div>`).join("") || 
+                "<p style='color:#555'>No scores yet</p>";
+
+            document.getElementById("modal-content").innerHTML = `
+                <div class="modal-row">
+                    <span class="key">Name</span>
+                    <span class="value">${data.name}</span>
+                </div>
+                <div class="modal-row">
+                    <span class="key">Email</span>
+                    <span class="value">${data.email}</span>
+                </div>
+                <div class="modal-row">
+                    <span class="key">ID</span>
+                    <span class="value">#${data.candidate_id}</span>
+                </div>
+                <br>
+                <div style="color:#00d4ff; margin-bottom:10px;">
+                    Score History
+                </div>
+                ${history}
+            `;
+
+            document.getElementById("modal").classList.add("active");
+        } catch {
+            alert("Could not load candidate details");
+        }
+    }
+
+    // ── Delete Candidate ─────────────────────
+    async function deleteCandidate(id) {
+        if (!confirm(
+            `Are you sure you want to delete candidate #${id}?`
+        )) return;
+
+        try {
+            const res = await fetch(
+                `${API}/recruiter/candidate/${id}`,
+                { method: "DELETE" }
+            );
+            const data = await res.json();
+            alert(data.message);
+            loadAll();
+            loadStats();
+        } catch {
+            alert("Error deleting candidate");
+        }
+    }
+
+    // ── Close Modal ──────────────────────────
+    function closeModal() {
+        document.getElementById("modal")
+                .classList.remove("active");
+    }
+
+    // ── Init ─────────────────────────────────
+    loadStats();
+    loadAll();
+</script>
+
+</body>
+</html>
