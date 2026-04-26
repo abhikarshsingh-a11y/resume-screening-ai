@@ -18,8 +18,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 from read_resume import read_resume
 from clean_text import clean_text
 
-# Load model
-model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Lighter model - uses less memory
+model = SentenceTransformer('paraphrase-MiniLM-L3-v2')
 
 def get_semantic_score(resume_text, job_text):
     resume_embedding = model.encode([resume_text])

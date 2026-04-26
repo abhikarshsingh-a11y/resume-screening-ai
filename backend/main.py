@@ -4,6 +4,9 @@ import shutil
 import warnings
 import logging
 
+import torch
+torch.set_num_threads(1)
+
 # Suppress logs FIRST
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 warnings.filterwarnings('ignore')
