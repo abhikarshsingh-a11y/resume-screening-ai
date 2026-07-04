@@ -5,7 +5,7 @@ keyword matching to fairly evaluate candidates.
 
 ## 👥 Team
 - Abhikarsh Singh (Person 1) - Resume Parser & Text Processing
-- Tashvi Singh (Person 2) - Job Description & Skill Matching
+- Taswi Singh (Person 2) - Job Description & Skill Matching
 
 ## 🎯 Problem We Are Solving
 Traditional ATS (Applicant Tracking Systems) have major flaws:
